@@ -1,4 +1,5 @@
-/* Dupla: Silvia Soares e Jonathan Bastos
+/*Este trabalho consiste na implementação de uma
+tabela hash simples, com as seguintes características:
 
 a. A tabela hash será composta por 10 listas
 encadeadas simples (na prática, um vetor de
@@ -22,314 +23,264 @@ ser executada de duas maneiras, por escolha
 do usuário – exibir os elementos de uma das
 listas (informando o seu número) ou de toda a
 tabela.
-
+Para se determinar a qual lista determinado número
+pertencerá, será necessário dividir este valor por 10
+(quantidade de listas da tabela) e recuperar o resto
+dessa operação. Este valor representará a lista na
+qual o elemento deverá ser inserido. Por exemplo, o
+número 34 será inserido na lista 4, pois o resto de
+34/10 é 4;
 */
 
-#include <stdio.h>
+//Dupla:
+//Silvia Soares e Jonathan Bastos
 
+#include <stdio.h>
 #include <stdlib.h>
 
-//definição de tipos
 typedef struct No {
-	int valor;
-	struct No *prox;
+    int valor;
+    struct No *prox;
 } TNo;
 
 typedef TNo* TLista;
 
-//protótipos das funções
-int inserir (TLista *L, int numero);
-int remover (TLista *L, int numero);
-int alterar (TLista L, int velho, int novo);
-TLista buscar (TLista L, int numero);
-void exibir (TLista L);
+#define TAM 10
 
-int menu ();
+int inserir(TLista *L, int numero);
+int remover(TLista *L, int numero);
+int alterar(TLista *L, int velho, int novo);
+TLista buscar(TLista *L, int numero, int *numtab);
+void exibir(TLista *L);
+int menu();
 
-//main
-void main ()
-{
-	//declaração de variáveis
-	TLista L = NULL;  //representando a lista inicialmente vazia
-	int num1, num2, op;
-	TLista pos;	
-	
-	do
-	{
-		system ("CLS");		//limpar tela    clrscr();
-		
-		//exibindo o meu ao usuário
-		op = menu ();
-		
-		//verificando a opção escolhida
-		switch (op)
-		{
-			//Inserção
-			case 1: printf ("\nEntre com o valor a ser inserido: ");
-			        scanf ("%d", &num1);
-			        
-			        //chamando a função
-			        if (inserir (&L, num1) == 1)   //ou apenas: if (inserir (&L, num1))			        
-			        {
-			        	printf ("\n\tInsercao realizada com sucesso!");
-					}
-					else
-					{
-						printf ("\n\tERRO: insercao nao realizada!");
-					}
-					break;
+int dividir(int numero);
+void exibirLista(TLista L);
 
-			//Remoção
-			case 2: printf ("\nEntre com o valor a ser removido: ");
-			        scanf ("%d", &num1);
-			        
-			        //chamando a função
-					if (remover (&L, num1))
-			        {
-			        	printf ("\n\tRemocao realizada!");
-					}
-					else
-					{
-						printf ("\n\tERRO: remocao nao realizada!");
-					}
-					break;
 
-			//Alteração
-			case 3: printf ("\nEntre com o valor a ser alterado: ");
-			        scanf ("%d", &num1);
-			        
-			        printf ("\nEntre com o novo valor: ");
-			        scanf ("%d", &num2);
-			        
-			        //chamando a função
-			        if (alterar (L, num1, num2))
-			        {
-			        	printf ("\n\tAlteracao realizada!");
-					}
-					else
-					{
-						printf ("\n\tERRO: alteracao nao realizada!");
-					}
-					break;
+int main() { 
+    TLista L[TAM] = {NULL}; 
+    int num1, num2, op;
+    TLista pos;
+    int encontrar;
 
-			//Busca
-			case 4: printf ("\nEntre com o valor a ser buscado: ");
-			        scanf ("%d", &num1);
-			        
-			        //chamando a função
-			        pos = buscar (L, num1);
-			        
-					if (pos)
-			        {
-			        	printf ("\n\tO valor %d foi encontrado na lista!", num1);
-					}
-					else
-					{
-						printf ("\n\tO valor %d NAO foi encontrado na lista!", num1);
-					}
-					break;
+    do {
+        system("CLS");
 
-			//Exibir
-			case 5: exibir (L);
-					break;
-					
-			//Saída
-			case 6: printf ("\n\nPrograma finalizado!");
-			        break;
-			        
-			default: printf ("\n\nOpcao invalida! Tente novamente.");
-		}
-		
-		system ("PAUSE");
-	}
-	while (op != 6);
+        op = menu();
+
+        switch (op) {
+            case 1: 
+                printf("\nEntre com o valor a ser inserido: ");
+                scanf("%d", &num1);
+
+                if (inserir(L, num1) == 1) {
+                    printf("\n\tInsercao realizada com sucesso!\n");
+                } else {
+                    printf("\n\tERRO: insercao nao realizada!\n");
+                }
+                break;
+
+            case 2: 
+                printf("\nEntre com o valor a ser removido: ");
+                scanf("%d", &num1);
+
+                if (remover(L, num1)) {
+                    printf("\n\tRemocao realizada!\n");
+                } else {
+                    printf("\n\tERRO: remocao nao realizada!\n");
+                }
+                break;
+
+            case 3: 
+                printf("\nEntre com o valor a ser alterado: ");
+                scanf("%d", &num1);
+
+                printf("\nEntre com o novo valor: ");
+                scanf("%d", &num2);
+
+                if (alterar(L, num1, num2)) {
+                    printf("\n\tAlteracao realizada!\n");
+                } else {
+                    printf("\n\tERRO: alteracao nao realizada!\n");
+                }
+                break;
+
+            case 4: 
+                printf("\nEntre com o valor a ser buscado: ");
+                scanf("%d", &num1);
+
+                pos = buscar(L, num1, &encontrar);
+                if (pos) {
+                    printf("\n\tO valor %d foi encontrado na lista da tabela %d!\n", pos->valor, encontrar);
+                } else {
+                    printf("\n\tO valor NAO foi encontrado na lista!\n");
+                }
+                break;
+
+            case 5: 
+                exibir(L);
+            case 6: 
+                printf("\n\nPrograma finalizado!\n");
+                break;
+
+            default: 
+                printf("\n\nOpcao invalida! Tente novamente.\n");
+        }
+
+        system("PAUSE");
+    } while (op != 6);
+
+    return 0;
 }
 
-//implementação das funções
-int inserir (TLista *L, int numero)
-{
-	//declaração de variáveis
-	TLista aux;
-	
-	//verificando se o número já existe na lista
-	//if (buscar (*L, numero) != NULL)
-	if (buscar (*L, numero))
-	{
-		return 0;
-	}
-	else
-	{
-		//Passo 1: alocar memória para o novo elemento
-		aux = (TLista) malloc (sizeof(TNo));   //malloc - memory allocation
-		
-		//verificando se houve erro na alocação
-		if (!aux)
-		{
-			return 0;
-		}
-		else
-		{
-			//Passo 2: armazenando 'numero' na posição recém-alocada
-			aux->valor = numero;
-			
-			//Passo 3: fazer o novo nó apontar para o "antigo primeiro nó"
-			aux->prox = *L;
-			
-			//Passo 4: fazer com que *L aponte para o novo Nó
-			*L = aux;
-			
-			return 1;
-		}
-	}
+int inserir(TLista *L, int numero) {
+    int tab;
+    TLista aux;
+
+  if(buscar(L, numero, &tab)){
+    return 0;
+  }
+
+    aux = (TLista) malloc(sizeof(TNo));
+    if (!aux) {
+        return 0;
+    }
+
+    aux->valor =numero;
+    aux->prox = L[tab];
+    L[tab]=aux;
+
+    return 1;
 }
 
-int remover (TLista *L, int numero)
-{
-	//declaração de variáveis
-	TLista pre, pos;
-	
-	if (*L)
-	{
-		if ((*L)->valor == numero)
-		{
-			//aux1 guardando o endereço do nó que será removido
-			pre = *L;   
-				
-			//fazendo *L apontar para o "antigo segundo nó"
-			*L = pre->prox;       //ou   *L = (*L)->prox;
-				
-			//liberando a memória do nó a ser removido
-			free (pre);
-				
-			return 1;
-		} 
-		else
-		{
-			//'pos' aponta para o segundo nó
-			pos = (*L)->prox;
-			
-			//'pre' aponta para o primeiro nó
-			pre = *L;
-			
-			//percorrendo a lista com 'pos'
-			while (pos)
-			{
-				//verificando se o valor a ser removido foi encontrado
-				if (pos->valor == numero)
-				{
-					//fazendo o nó anterior apontar para o próximo
-					pre->prox = pos->prox;
-					
-					//liberando o nó que contém o valor a ser removido
-					free (pos);
-	
-					return 1;
-				}
-				else
-				{
-					pre = pos;
-					pos = pos->prox;   //ou: pos = pre->prox;
-				}
-			}
-		}
-	}
-	
-	return 0;
+int remover(TLista *L, int numero) {
+    int tab;
+    TLista pre, pos;
+
+    if (buscar(L, numero, &tab)) {
+        if (L[tab]) {
+            if (L[tab]->valor == numero) {
+                pre = L[tab];
+                L[tab] = pre->prox;
+                free(pre);
+                return 1;
+            } else {
+                pos = L[tab]->prox;
+                pre = L[tab];
+                while (pos) {
+                    if (pos->valor == numero) {
+                        pre->prox = pos->prox;
+                        free(pos);
+                        return 1;
+                    } else {
+                        pre = pos;
+                        pos = pos->prox;
+                    }
+                }
+            }
+        }
+    }
+    return 0;
 }
 
-int alterar (TLista L, int velho, int novo)
-{
-	//declaração de variáveis
-	TLista posNovo, posVelho;
 
-	//buscando o elemento a ser alterado
-	posVelho = buscar (L, velho);
-	
-	//se o 'velho' for encontrado
-	if (posVelho)
-	{
-		//buscando o novo elemento na lista
-		posNovo = buscar (L, novo);
-		
-		//se o 'novo não existir na lista, a alteração poderá ser realizada
-		if (!posNovo)
-		{
-			//alterando os elementos
-			posVelho->valor = novo;
-			
-			return 1;
-		}
-	}
-	
-	return 0;
+int alterar(TLista *L, int velho, int novo){ 
+    if(inserir(L, novo)){
+        if(remover(L, velho)){
+            return 1;
+        }else{
+            remover(L, novo);    
+        }
+    }
+    return 0;
 }
 
-TLista buscar (TLista L, int numero)
-{
-	//declaração de variáveis
-	TLista aux = L;
+TLista buscar(TLista *L, int numero, int *numtab){
+    TLista aux;
+    int tabela=dividir(numero);
+    if (numtab){
+        *numtab=tabela;
+    }
 
-	//percorrendo os elementos da lista	
-	while (aux)
-	{
-		//verificando se 'numero' foi encontrado
-		if (aux->valor == numero)
-		{
-			return aux;
-		}
-			
-		aux = aux->prox;
-	}
-	
-	//'numero' não se encontra na lista
-	return NULL;
+    aux =L[tabela];
+    while (aux) {
+        if (aux->valor== numero) {
+            return aux;
+        }
+        aux = aux->prox;
+    }
+    return NULL;
 }
 
-void exibir (TLista L)
-{
-	//declaração de variáveis
-	TLista aux = L;
-	
-	//verificando se a lista está vazia
-	if (!L)
-	{
-		printf ("Lista vazia!\n");
-	}
-	else
-	{
-		printf ("Lista: ");
-	
-		//while (aux != NULL)
-		while (aux)
-		{
-			printf ("%d ", aux->valor);
-			//ou:    printf ("%d ", (*aux).valor);
-			
-			aux = aux->prox;
-		}
-		
-		printf ("\n");
-	}
+void exibir(TLista *L) 
+  {
+    int opcao;
+    printf("deseja exibir:\n");
+    printf("(1) Uma lista especifica\n");
+    printf("(2) toda a tabela\n");
+    printf("Opcao: ");
+    scanf("%d", &opcao);
+
+    switch (opcao) 
+      {
+        case 1: 
+            {
+            int numLista;
+            printf("Digite o numero da lista: ");
+            scanf("%d", &numLista);
+
+            if (numLista < 0 || numLista >= TAM) {
+                printf("Lista invalida!\n");
+                break;
+            }
+
+            exibirLista(L[numLista]);
+            break;
+        }
+        case 2:
+            for (int i = 0; i < TAM; i++) 
+              {
+                printf("Lista %d: ", i);
+                exibirLista(L[i]);
+            }
+            break;
+        default:
+            printf("Opcao invalida!\n");
+            break;
+    }
 }
 
-int menu ()
-{
-	//declaração de variáveis
-	int opcao;
-	
-	//exibindo o meu ao usuário
-	printf ("Menu de Operacoes:\n\n");
-	printf ("(1) Inserir\n");
-	printf ("(2) Remover\n");
-	printf ("(3) Alterar\n");
-	printf ("(4) Buscar\n");
-	printf ("(5) Exibir\n");
-	printf ("(6) Sair\n\n");
-	
-	//lendo a opção do usuário
-	printf ("Entre com a sua opcao: ");
-	scanf ("%d", &opcao);
-	
-	//retornando a opção escolhida
-	return opcao;
+void exibirLista(TLista L) {
+    TLista aux = L;
+    if (!aux) {
+        printf("Lista vazia!\n");
+    } else {
+        while (aux) {
+            printf("%d\t", aux->valor);
+            aux = aux->prox;
+        }
+        printf("\n");
+    }
+}
+
+int menu() {
+    int opcao;
+
+    printf("Menu de Operacoes:\n\n");
+    printf("(1) Inserir\n");
+    printf("(2) Remover\n");
+    printf("(3) Alterar\n");
+    printf("(4) Buscar\n");
+    printf("(5) Exibir\n");
+    printf("(6) Sair\n\n");
+
+    printf("Entre com a sua opcao: ");
+    scanf("%d", &opcao);
+
+    return opcao;
+}
+
+int dividir(int numero) {
+    return numero % TAM;
 }
