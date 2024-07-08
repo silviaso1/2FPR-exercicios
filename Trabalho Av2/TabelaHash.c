@@ -50,7 +50,7 @@ typedef TNo* TLista;
 int inserir(TLista *L, int numero);
 int remover(TLista *L, int numero);
 int alterar(TLista *L, int velho, int novo);
-TLista buscar(TLista *L, int numero, int *numtab);
+TLista buscar(TLista *L, int numero, int *numtab, TLista *pre);
 void exibir(TLista *L);
 int menu();
 
@@ -61,7 +61,7 @@ void exibirLista(TLista L);
 int main() { 
     TLista L[TAM] = {NULL}; 
     int num1, num2, op;
-    TLista pos;
+    TLista pos, pre;
     int encontrar;
 
     do {
@@ -110,7 +110,7 @@ int main() {
                 printf("\nEntre com o valor a ser buscado: ");
                 scanf("%d", &num1);
 
-                pos = buscar(L, num1, &encontrar);
+                pos = buscar(L, num1, &encontrar, &pre);
                 if (pos) {
                     printf("\n\tO valor %d foi encontrado na lista da tabela %d!\n", pos->valor, encontrar);
                 } else {
@@ -120,6 +120,7 @@ int main() {
 
             case 5: 
                 exibir(L);
+                break;
             case 6: 
                 printf("\n\nPrograma finalizado!\n");
                 break;
@@ -136,20 +137,20 @@ int main() {
 
 int inserir(TLista *L, int numero) {
     int tab;
-    TLista aux;
+    TLista aux, pre;
 
-  if(buscar(L, numero, &tab)){
-    return 0;
-  }
+    if (buscar(L, numero, &tab, &pre)) {
+        return 0;
+    }
 
     aux = (TLista) malloc(sizeof(TNo));
     if (!aux) {
         return 0;
     }
 
-    aux->valor =numero;
+    aux->valor = numero;
     aux->prox = L[tab];
-    L[tab]=aux;
+    L[tab] = aux;
 
     return 1;
 }
@@ -158,28 +159,15 @@ int remover(TLista *L, int numero) {
     int tab;
     TLista pre, pos;
 
-    if (buscar(L, numero, &tab)) {
-        if (L[tab]) {
-            if (L[tab]->valor == numero) {
-                pre = L[tab];
-                L[tab] = pre->prox;
-                free(pre);
-                return 1;
-            } else {
-                pos = L[tab]->prox;
-                pre = L[tab];
-                while (pos) {
-                    if (pos->valor == numero) {
-                        pre->prox = pos->prox;
-                        free(pos);
-                        return 1;
-                    } else {
-                        pre = pos;
-                        pos = pos->prox;
-                    }
-                }
-            }
+    pos=buscar(L, numero, &tab, &pre);
+    if (pos){
+        if (pre == NULL){
+            L[tab] = pos->prox;
+        }else{
+            pre->prox= pos->prox;
         }
+        free(pos);
+        return 1;
     }
     return 0;
 }
@@ -196,25 +184,28 @@ int alterar(TLista *L, int velho, int novo){
     return 0;
 }
 
-TLista buscar(TLista *L, int numero, int *numtab){
+TLista buscar(TLista *L, int numero, int *numtab, TLista *pre){
     TLista aux;
     int tabela=dividir(numero);
     if (numtab){
-        *numtab=tabela;
+        *numtab= tabela;
     }
 
-    aux =L[tabela];
+    aux = L[tabela];
+    *pre =NULL;
+
     while (aux) {
-        if (aux->valor== numero) {
+        if (aux->valor == numero) {
             return aux;
         }
+        *pre=aux;
         aux = aux->prox;
     }
     return NULL;
 }
 
 void exibir(TLista *L) 
-  {
+{
     int opcao;
     printf("deseja exibir:\n");
     printf("(1) Uma lista especifica\n");
@@ -223,9 +214,8 @@ void exibir(TLista *L)
     scanf("%d", &opcao);
 
     switch (opcao) 
-      {
-        case 1: 
-            {
+    {
+        case 1: {
             int numLista;
             printf("Digite o numero da lista: ");
             scanf("%d", &numLista);
@@ -239,8 +229,7 @@ void exibir(TLista *L)
             break;
         }
         case 2:
-            for (int i = 0; i < TAM; i++) 
-              {
+            for (int i = 0; i < TAM; i++) {
                 printf("Lista %d: ", i);
                 exibirLista(L[i]);
             }
@@ -251,7 +240,8 @@ void exibir(TLista *L)
     }
 }
 
-void exibirLista(TLista L) {
+void exibirLista(TLista L) 
+{
     TLista aux = L;
     if (!aux) {
         printf("Lista vazia!\n");
@@ -281,6 +271,6 @@ int menu() {
     return opcao;
 }
 
-int dividir(int numero) {
-    return numero % TAM;
+int dividir(int numero){
+    return numero % 10;
 }
